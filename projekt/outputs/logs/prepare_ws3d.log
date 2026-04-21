@@ -1,0 +1,117 @@
+2026-04-14 19:00:09,686 [INFO] === WS3D preprocessing start ===
+2026-04-14 19:00:09,731 [WARNING] [ffmpeg] FAIL ses1.m4a
+2026-04-14 19:00:11,585 [ERROR] FAILED LOAD: ses1.m4a
+2026-04-14 19:00:11,620 [WARNING] [ffmpeg] FAIL ses10.m4a
+2026-04-14 19:00:11,667 [ERROR] FAILED LOAD: ses10.m4a
+2026-04-14 19:00:11,705 [WARNING] [ffmpeg] FAIL ses11.m4a
+2026-04-14 19:00:11,751 [ERROR] FAILED LOAD: ses11.m4a
+2026-04-14 19:00:11,788 [WARNING] [ffmpeg] FAIL ses12.m4a
+2026-04-14 19:00:11,834 [ERROR] FAILED LOAD: ses12.m4a
+2026-04-14 19:00:11,868 [WARNING] [ffmpeg] FAIL ses13.m4a
+2026-04-14 19:00:11,914 [ERROR] FAILED LOAD: ses13.m4a
+2026-04-14 19:00:11,951 [WARNING] [ffmpeg] FAIL ses14.m4a
+2026-04-14 19:00:11,995 [ERROR] FAILED LOAD: ses14.m4a
+2026-04-14 19:00:12,030 [WARNING] [ffmpeg] FAIL ses15.m4a
+2026-04-14 19:00:12,075 [ERROR] FAILED LOAD: ses15.m4a
+2026-04-14 19:00:12,111 [WARNING] [ffmpeg] FAIL ses16.m4a
+2026-04-14 19:00:12,159 [ERROR] FAILED LOAD: ses16.m4a
+2026-04-14 19:00:12,193 [WARNING] [ffmpeg] FAIL ses17.m4a
+2026-04-14 19:00:12,240 [ERROR] FAILED LOAD: ses17.m4a
+2026-04-14 19:00:12,276 [WARNING] [ffmpeg] FAIL ses18.m4a
+2026-04-14 19:00:12,322 [ERROR] FAILED LOAD: ses18.m4a
+2026-04-14 19:00:12,356 [WARNING] [ffmpeg] FAIL ses19.m4a
+2026-04-14 19:00:12,402 [ERROR] FAILED LOAD: ses19.m4a
+2026-04-14 19:00:12,438 [WARNING] [ffmpeg] FAIL ses2.m4a
+2026-04-14 19:00:12,484 [ERROR] FAILED LOAD: ses2.m4a
+2026-04-14 19:00:12,521 [WARNING] [ffmpeg] FAIL ses20.m4a
+2026-04-14 19:00:12,568 [ERROR] FAILED LOAD: ses20.m4a
+2026-04-14 19:00:12,605 [WARNING] [ffmpeg] FAIL ses21.m4a
+2026-04-14 19:00:12,651 [ERROR] FAILED LOAD: ses21.m4a
+2026-04-14 19:00:12,686 [WARNING] [ffmpeg] FAIL ses22.m4a
+2026-04-14 19:00:12,732 [ERROR] FAILED LOAD: ses22.m4a
+2026-04-14 19:00:12,767 [WARNING] [ffmpeg] FAIL ses23.m4a
+2026-04-14 19:00:12,813 [ERROR] FAILED LOAD: ses23.m4a
+2026-04-14 19:00:12,846 [WARNING] [ffmpeg] FAIL ses24.m4a
+2026-04-14 19:00:12,892 [ERROR] FAILED LOAD: ses24.m4a
+2026-04-14 19:00:12,929 [WARNING] [ffmpeg] FAIL ses25.m4a
+2026-04-14 19:00:12,975 [ERROR] FAILED LOAD: ses25.m4a
+2026-04-14 19:00:13,011 [WARNING] [ffmpeg] FAIL ses26.m4a
+2026-04-14 19:00:13,055 [ERROR] FAILED LOAD: ses26.m4a
+2026-04-14 19:00:13,091 [WARNING] [ffmpeg] FAIL ses27.m4a
+2026-04-14 19:00:13,136 [ERROR] FAILED LOAD: ses27.m4a
+2026-04-14 19:00:13,170 [WARNING] [ffmpeg] FAIL ses28.m4a
+2026-04-14 19:00:13,216 [ERROR] FAILED LOAD: ses28.m4a
+2026-04-14 19:00:13,251 [WARNING] [ffmpeg] FAIL ses29.m4a
+2026-04-14 19:00:13,299 [ERROR] FAILED LOAD: ses29.m4a
+2026-04-14 19:00:13,333 [WARNING] [ffmpeg] FAIL ses3.m4a
+2026-04-14 19:00:13,381 [ERROR] FAILED LOAD: ses3.m4a
+2026-04-14 19:00:13,416 [WARNING] [ffmpeg] FAIL ses30.m4a
+2026-04-14 19:00:13,463 [ERROR] FAILED LOAD: ses30.m4a
+2026-04-14 19:00:13,497 [WARNING] [ffmpeg] FAIL ses31.m4a
+2026-04-14 19:00:13,543 [ERROR] FAILED LOAD: ses31.m4a
+2026-04-14 19:00:13,579 [WARNING] [ffmpeg] FAIL ses32.m4a
+2026-04-14 19:00:13,626 [ERROR] FAILED LOAD: ses32.m4a
+2026-04-14 19:00:13,662 [WARNING] [ffmpeg] FAIL ses33.m4a
+2026-04-14 19:00:13,708 [ERROR] FAILED LOAD: ses33.m4a
+2026-04-14 19:00:13,743 [WARNING] [ffmpeg] FAIL ses34.m4a
+2026-04-14 19:00:13,788 [ERROR] FAILED LOAD: ses34.m4a
+2026-04-14 19:00:13,823 [WARNING] [ffmpeg] FAIL ses35.m4a
+2026-04-14 19:00:13,869 [ERROR] FAILED LOAD: ses35.m4a
+2026-04-14 19:00:13,903 [WARNING] [ffmpeg] FAIL ses36.m4a
+2026-04-14 19:00:13,950 [ERROR] FAILED LOAD: ses36.m4a
+2026-04-14 19:00:13,986 [WARNING] [ffmpeg] FAIL ses37.m4a
+2026-04-14 19:00:14,030 [ERROR] FAILED LOAD: ses37.m4a
+2026-04-14 19:00:14,067 [WARNING] [ffmpeg] FAIL ses4.m4a
+2026-04-14 19:00:14,112 [ERROR] FAILED LOAD: ses4.m4a
+2026-04-14 19:00:14,152 [WARNING] [ffmpeg] FAIL ses5.m4a
+2026-04-14 19:00:14,198 [ERROR] FAILED LOAD: ses5.m4a
+2026-04-14 19:00:14,237 [WARNING] [ffmpeg] FAIL ses53.m4a
+2026-04-14 19:00:14,286 [ERROR] FAILED LOAD: ses53.m4a
+2026-04-14 19:00:14,324 [WARNING] [ffmpeg] FAIL ses6.m4a
+2026-04-14 19:00:14,369 [ERROR] FAILED LOAD: ses6.m4a
+2026-04-14 19:00:14,405 [WARNING] [ffmpeg] FAIL ses7.m4a
+2026-04-14 19:00:14,452 [ERROR] FAILED LOAD: ses7.m4a
+2026-04-14 19:00:14,489 [WARNING] [ffmpeg] FAIL ses8.m4a
+2026-04-14 19:00:14,536 [ERROR] FAILED LOAD: ses8.m4a
+2026-04-14 19:00:14,572 [WARNING] [ffmpeg] FAIL ses9.m4a
+2026-04-14 19:00:14,619 [ERROR] FAILED LOAD: ses9.m4a
+2026-04-14 19:00:14,629 [INFO] Saved labels: 29
+2026-04-14 19:00:14,629 [INFO] === HOTOVO ===  OK: 29  FAIL: 38
+2026-04-14 19:00:14,629 [WARNING] FAILED: C:\Users\sb777\Documents\GitHub\ns-projekt-dsrs\data\raw\ws3d\AudioData\ses1.m4a
+2026-04-14 19:00:14,629 [WARNING] FAILED: C:\Users\sb777\Documents\GitHub\ns-projekt-dsrs\data\raw\ws3d\AudioData\ses10.m4a
+2026-04-14 19:00:14,629 [WARNING] FAILED: C:\Users\sb777\Documents\GitHub\ns-projekt-dsrs\data\raw\ws3d\AudioData\ses11.m4a
+2026-04-14 19:00:14,629 [WARNING] FAILED: C:\Users\sb777\Documents\GitHub\ns-projekt-dsrs\data\raw\ws3d\AudioData\ses12.m4a
+2026-04-14 19:00:14,629 [WARNING] FAILED: C:\Users\sb777\Documents\GitHub\ns-projekt-dsrs\data\raw\ws3d\AudioData\ses13.m4a
+2026-04-14 19:00:14,629 [WARNING] FAILED: C:\Users\sb777\Documents\GitHub\ns-projekt-dsrs\data\raw\ws3d\AudioData\ses14.m4a
+2026-04-14 19:00:14,629 [WARNING] FAILED: C:\Users\sb777\Documents\GitHub\ns-projekt-dsrs\data\raw\ws3d\AudioData\ses15.m4a
+2026-04-14 19:00:14,629 [WARNING] FAILED: C:\Users\sb777\Documents\GitHub\ns-projekt-dsrs\data\raw\ws3d\AudioData\ses16.m4a
+2026-04-14 19:00:14,629 [WARNING] FAILED: C:\Users\sb777\Documents\GitHub\ns-projekt-dsrs\data\raw\ws3d\AudioData\ses17.m4a
+2026-04-14 19:00:14,629 [WARNING] FAILED: C:\Users\sb777\Documents\GitHub\ns-projekt-dsrs\data\raw\ws3d\AudioData\ses18.m4a
+2026-04-14 19:00:14,629 [WARNING] FAILED: C:\Users\sb777\Documents\GitHub\ns-projekt-dsrs\data\raw\ws3d\AudioData\ses19.m4a
+2026-04-14 19:00:14,629 [WARNING] FAILED: C:\Users\sb777\Documents\GitHub\ns-projekt-dsrs\data\raw\ws3d\AudioData\ses2.m4a
+2026-04-14 19:00:14,629 [WARNING] FAILED: C:\Users\sb777\Documents\GitHub\ns-projekt-dsrs\data\raw\ws3d\AudioData\ses20.m4a
+2026-04-14 19:00:14,629 [WARNING] FAILED: C:\Users\sb777\Documents\GitHub\ns-projekt-dsrs\data\raw\ws3d\AudioData\ses21.m4a
+2026-04-14 19:00:14,629 [WARNING] FAILED: C:\Users\sb777\Documents\GitHub\ns-projekt-dsrs\data\raw\ws3d\AudioData\ses22.m4a
+2026-04-14 19:00:14,629 [WARNING] FAILED: C:\Users\sb777\Documents\GitHub\ns-projekt-dsrs\data\raw\ws3d\AudioData\ses23.m4a
+2026-04-14 19:00:14,629 [WARNING] FAILED: C:\Users\sb777\Documents\GitHub\ns-projekt-dsrs\data\raw\ws3d\AudioData\ses24.m4a
+2026-04-14 19:00:14,629 [WARNING] FAILED: C:\Users\sb777\Documents\GitHub\ns-projekt-dsrs\data\raw\ws3d\AudioData\ses25.m4a
+2026-04-14 19:00:14,629 [WARNING] FAILED: C:\Users\sb777\Documents\GitHub\ns-projekt-dsrs\data\raw\ws3d\AudioData\ses26.m4a
+2026-04-14 19:00:14,630 [WARNING] FAILED: C:\Users\sb777\Documents\GitHub\ns-projekt-dsrs\data\raw\ws3d\AudioData\ses27.m4a
+2026-04-14 19:00:14,630 [WARNING] FAILED: C:\Users\sb777\Documents\GitHub\ns-projekt-dsrs\data\raw\ws3d\AudioData\ses28.m4a
+2026-04-14 19:00:14,630 [WARNING] FAILED: C:\Users\sb777\Documents\GitHub\ns-projekt-dsrs\data\raw\ws3d\AudioData\ses29.m4a
+2026-04-14 19:00:14,630 [WARNING] FAILED: C:\Users\sb777\Documents\GitHub\ns-projekt-dsrs\data\raw\ws3d\AudioData\ses3.m4a
+2026-04-14 19:00:14,630 [WARNING] FAILED: C:\Users\sb777\Documents\GitHub\ns-projekt-dsrs\data\raw\ws3d\AudioData\ses30.m4a
+2026-04-14 19:00:14,630 [WARNING] FAILED: C:\Users\sb777\Documents\GitHub\ns-projekt-dsrs\data\raw\ws3d\AudioData\ses31.m4a
+2026-04-14 19:00:14,630 [WARNING] FAILED: C:\Users\sb777\Documents\GitHub\ns-projekt-dsrs\data\raw\ws3d\AudioData\ses32.m4a
+2026-04-14 19:00:14,630 [WARNING] FAILED: C:\Users\sb777\Documents\GitHub\ns-projekt-dsrs\data\raw\ws3d\AudioData\ses33.m4a
+2026-04-14 19:00:14,630 [WARNING] FAILED: C:\Users\sb777\Documents\GitHub\ns-projekt-dsrs\data\raw\ws3d\AudioData\ses34.m4a
+2026-04-14 19:00:14,630 [WARNING] FAILED: C:\Users\sb777\Documents\GitHub\ns-projekt-dsrs\data\raw\ws3d\AudioData\ses35.m4a
+2026-04-14 19:00:14,630 [WARNING] FAILED: C:\Users\sb777\Documents\GitHub\ns-projekt-dsrs\data\raw\ws3d\AudioData\ses36.m4a
+2026-04-14 19:00:14,630 [WARNING] FAILED: C:\Users\sb777\Documents\GitHub\ns-projekt-dsrs\data\raw\ws3d\AudioData\ses37.m4a
+2026-04-14 19:00:14,630 [WARNING] FAILED: C:\Users\sb777\Documents\GitHub\ns-projekt-dsrs\data\raw\ws3d\AudioData\ses4.m4a
+2026-04-14 19:00:14,630 [WARNING] FAILED: C:\Users\sb777\Documents\GitHub\ns-projekt-dsrs\data\raw\ws3d\AudioData\ses5.m4a
+2026-04-14 19:00:14,630 [WARNING] FAILED: C:\Users\sb777\Documents\GitHub\ns-projekt-dsrs\data\raw\ws3d\AudioData\ses53.m4a
+2026-04-14 19:00:14,630 [WARNING] FAILED: C:\Users\sb777\Documents\GitHub\ns-projekt-dsrs\data\raw\ws3d\AudioData\ses6.m4a
+2026-04-14 19:00:14,630 [WARNING] FAILED: C:\Users\sb777\Documents\GitHub\ns-projekt-dsrs\data\raw\ws3d\AudioData\ses7.m4a
+2026-04-14 19:00:14,630 [WARNING] FAILED: C:\Users\sb777\Documents\GitHub\ns-projekt-dsrs\data\raw\ws3d\AudioData\ses8.m4a
+2026-04-14 19:00:14,630 [WARNING] FAILED: C:\Users\sb777\Documents\GitHub\ns-projekt-dsrs\data\raw\ws3d\AudioData\ses9.m4a
