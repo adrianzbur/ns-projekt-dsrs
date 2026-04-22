@@ -1,0 +1,68 @@
+{
+  "generated_at": "2026-04-22T21:08:45.281260Z",
+  "results": {
+    "tess_mlp": {
+      "accuracy": 0.996875,
+      "precision": 1.0,
+      "recall": 0.9953125,
+      "f1": 0.9976507439310884,
+      "confusion_matrix": [
+        [
+          320,
+          0
+        ],
+        [
+          3,
+          637
+        ]
+      ],
+      "roc_auc": 0.99998046875
+    },
+    "tess_cnn": {
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "confusion_matrix": [
+        [
+          320,
+          0
+        ],
+        [
+          0,
+          640
+        ]
+      ],
+      "roc_auc": 1.0
+    },
+    "ws3d_mlp": {
+      "accuracy": 0.6666666666666666,
+      "precision": 1.0,
+      "recall": 0.6666666666666666,
+      "f1": 0.8,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          2
+        ]
+      ],
+      "roc_auc": NaN
+    },
+    "ws3d_cnn": {
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "confusion_matrix": [
+        [
+          3
+        ]
+      ],
+      "roc_auc": NaN
+    }
+  }
+}
