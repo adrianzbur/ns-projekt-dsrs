@@ -37,7 +37,8 @@ from src.config import (
     CNN_EPOCHS,
     CNN_LR,
     CNN_WEIGHT_DECAY,
-    FEATURE_DIM,
+    TESS_FEATURE_DIM,
+    WS3D_FEATURE_DIM,
 )
 from src.data.tess_dataset import TessDataset
 from src.data.ws3d_dataset import Ws3dDataset   # <-- zmena
@@ -104,9 +105,11 @@ def get_dataloaders(dataset_name: str, model_type: str, batch_size: int, device:
 
     return train_loader, val_loader, test_loader
 
-
-def build_model(model_type: str):
-    return MLP(input_dim=FEATURE_DIM) if model_type == "mlp" else CNN()
+def build_model(dataset_name: str, model_type: str):
+    if model_type == "mlp":
+        input_dim = TESS_FEATURE_DIM if dataset_name == "tess" else WS3D_FEATURE_DIM
+        return MLP(input_dim=input_dim)
+    return CNN()
 
 
 def run_single(dataset_name: str, model_type: str, epochs: int, device: str) -> dict:
@@ -118,7 +121,7 @@ def run_single(dataset_name: str, model_type: str, epochs: int, device: str) -> 
     bs = MLP_BATCH_SIZE if model_type == "mlp" else CNN_BATCH_SIZE
     train_loader, val_loader, test_loader = get_dataloaders(dataset_name, model_type, bs, device)
 
-    model = build_model(model_type)
+    model = build_model(dataset_name, model_type)
     lr = MLP_LR if model_type == "mlp" else CNN_LR
     wd = MLP_WEIGHT_DECAY if model_type == "mlp" else CNN_WEIGHT_DECAY
 

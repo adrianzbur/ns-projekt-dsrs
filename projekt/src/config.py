@@ -96,4 +96,9 @@ CNN_LR = Config.LEARNING_RATE
 CNN_WEIGHT_DECAY = 1e-4
 
 # vstupný rozmer feature vektora (podľa MFCC)
-FEATURE_DIM = Config.N_MFCC
+# vstupné rozmery
+TESS_FEATURE_DIM = Config.N_MFCC     # 13
+WS3D_FEATURE_DIM = 120               # 40 MFCC + delta + delta2
+
+# spätná kompatibilita
+FEATURE_DIM = TESS_FEATURE_DIM
