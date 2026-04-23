@@ -156,7 +156,7 @@ Súhrnné metriky všetkých experimentov: `outputs/summary_metrics.json`
 | neutral, calm, ps | 0 (bez stresu) |
 | angry, fear, disgust, sad | 1 (stres) |
 
-### WS3D
+### WS3D (WorkStress3D)
 - Audio nahrávky s emóciami zakódovanými v názve súboru
 - Sample rate: 16 000 Hz
 - Split: speaker-independent (train / val / test podľa subjektu)
