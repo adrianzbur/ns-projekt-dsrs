@@ -16,33 +16,30 @@ def _infer_label(filename: str) -> int:
     Odvodí label z názvu súboru pomocou Config.WS3D_LABEL_MAPPING.
 
     Príklady:
-        ses_a03.wav  → prefix "a"  → angry  → 1
-        ses_n04.wav  → prefix "n"  → neutral → 0
-        ses_sa01.wav → prefix "sa" → sadness → 1
-        ses38.m4a    → žiadny prefix → -1 (neznámy)
+        ses_a03.wav  → prefix "a"  → angry   → 1
+        ses_n04.wav  → prefix "n"  → neutral  → 0
+        ses_sa01.wav → prefix "sa" → sadness  → 1
+        ses38.m4a    → žiadny prefix → -1
     """
-    stem = Path(filename).stem.lower()  # napr. "ses_a03" alebo "ses38"
+    stem = Path(filename).stem.lower()
 
-    # Odstrán "ses_" prefix
-    if "_" in stem:
-        after_underscore = stem.split("_", 1)[1]  # napr. "a03" alebo "sa01"
-    else:
-        return -1  # napr. "ses38" → žiadna emócia v názve
+    if "_" not in stem:
+        return -1
 
-    # Extrahuj len písmená zo začiatku
+    after_underscore = stem.split("_", 1)[1]  # "a03", "sa01", ...
+
     emotion_prefix = ""
     for ch in after_underscore:
         if ch.isalpha():
             emotion_prefix += ch
         else:
-            break  # narazili sme na číslo
+            break
 
     if not emotion_prefix:
         return -1
 
     mapping = Config.WS3D_LABEL_MAPPING
 
-    # Skús celý prefix (napr. "sa"), potom prvý znak (napr. "s")
     if emotion_prefix in mapping:
         return mapping[emotion_prefix]
     if emotion_prefix[0] in mapping:
@@ -52,7 +49,6 @@ def _infer_label(filename: str) -> int:
 
 
 def _to_posix(path_str: str) -> str:
-    """Konvertuje Windows cestu (aj na Linuxe) na POSIX formát."""
     try:
         return PureWindowsPath(path_str).as_posix()
     except Exception:
@@ -63,8 +59,8 @@ class Ws3dDataset(Dataset):
     """
     WS3D dataset loader kompatibilný s existujúcim labels.csv.
 
-    Label sa odvodí priamo z názvu súboru cez Config.WS3D_LABEL_MAPPING
-    — labels.csv môže mať label=-1, to nevadí.
+    Používa stratifikovaný split (rovnako ako TessDataset) pretože
+    dataset má príliš málo vzoriek (14) na speaker-independent split.
 
     mode="features"     → tensor (120, T)   pre MLP
     mode="spectrograms" → tensor (1, 128, T) pre CNN
@@ -95,16 +91,16 @@ class Ws3dDataset(Dataset):
         if not labels_path.exists():
             raise FileNotFoundError(
                 f"labels.csv nenájdený: {labels_path}\n"
-                "Spusti najprv: python src/data/prepare_ws3d.py"
+                "Spusti najprv: python scripts/prepare_ws3d.py"
             )
 
         df = pd.read_csv(labels_path)
         df.columns = [c.strip().lower() for c in df.columns]
 
-        # ── oprav labely z názvu súboru ─────────────────────────────────────
+        # ── odvoď labely z názvu súboru ─────────────────────────────────────
         df["label"] = df["filename"].apply(_infer_label)
 
-        # ── vyhoď riadky kde label == -1 (ses38.m4a a pod.) ────────────────
+        # ── vyhoď riadky bez platného labelu (ses38.m4a a pod.) ─────────────
         before = len(df)
         df = df[df["label"].isin([0, 1])].reset_index(drop=True)
         after = len(df)
@@ -115,40 +111,45 @@ class Ws3dDataset(Dataset):
                 "Skontroluj Config.WS3D_LABEL_MAPPING a názvy súborov v labels.csv."
             )
 
-        print(f"[Ws3dDataset] Načítaných: {before}  |  S labelom: {after}  |  "
+        print(f"[Ws3dDataset] Celkom: {before}  |  S labelom: {after}  |  "
               f"Vyhodených: {before - after}  |  "
-              f"stress={( df['label']==1).sum()}  no-stress={(df['label']==0).sum()}")
+              f"stress={(df['label'] == 1).sum()}  "
+              f"no-stress={(df['label'] == 0).sum()}")
 
         # ── oprav Windows cesty na POSIX ────────────────────────────────────
         for col in ("feat_path", "spec_path"):
             df[col] = df[col].apply(_to_posix)
 
-        # ── speaker-independent split podľa subject ─────────────────────────
-        subjects = df["subject"].unique()
-
-        train_subj, test_subj = train_test_split(
-            subjects, test_size=_test_size, random_state=_seed,
+        # ── stratifikovaný split podľa labelu ───────────────────────────────
+        # (rovnaká logika ako TessDataset — zaručí obe triedy v každom splite)
+        train_val_df, test_df = train_test_split(
+            df,
+            test_size=_test_size,
+            random_state=_seed,
+            stratify=df["label"],
         )
+
         val_ratio_adjusted = _val_size / (1.0 - _test_size)
-        train_subj, val_subj = train_test_split(
-            train_subj, test_size=val_ratio_adjusted, random_state=_seed,
+        train_df, val_df = train_test_split(
+            train_val_df,
+            test_size=val_ratio_adjusted,
+            random_state=_seed,
+            stratify=train_val_df["label"],
         )
 
         if split == "train":
-            mask = df["subject"].isin(train_subj)
+            self.metadata = train_df.reset_index(drop=True)
         elif split == "val":
-            mask = df["subject"].isin(val_subj)
+            self.metadata = val_df.reset_index(drop=True)
         else:
-            mask = df["subject"].isin(test_subj)
+            self.metadata = test_df.reset_index(drop=True)
 
-        self.metadata = df[mask].reset_index(drop=True)
+        print(f"[Ws3dDataset] split='{split}'  vzorky={len(self.metadata)}  "
+              f"stress={(self.metadata['label'] == 1).sum()}  "
+              f"no-stress={(self.metadata['label'] == 0).sum()}")
 
         if len(self.metadata) == 0:
-            raise ValueError(
-                f"Split '{split}' je prázdny po rozdelení "
-                f"(celkovo {len(subjects)} subjektov). "
-                "Skontroluj veľkosti splitov v Config."
-            )
+            raise ValueError(f"Split '{split}' je prázdny.")
 
     def __len__(self) -> int:
         return len(self.metadata)
@@ -159,11 +160,7 @@ class Ws3dDataset(Dataset):
 
         row = self.metadata.iloc[idx]
 
-        if self.mode == "features":
-            rel_path = row["feat_path"]
-        else:
-            rel_path = row["spec_path"]
-
+        rel_path = row["feat_path"] if self.mode == "features" else row["spec_path"]
         file_path = Config.ROOT_DIR / rel_path
 
         if not file_path.exists():
