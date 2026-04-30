@@ -1,0 +1,20 @@
+2026-04-30 16:18:36,046 [INFO] === CREMA-D preprocessing start ===
+2026-04-30 16:18:36,115 [INFO] Nájdené súbory: 7441 platných, 1 preskoèených
+2026-04-30 16:21:50,416 [INFO] Metadáta uložené: C:\Users\sb777\Documents\GitHub\ns-projekt-dsrs\projekt\data\processed\cremad\metadata.csv  (7441 vzoriek)
+2026-04-30 16:21:50,459 [INFO] Celkom vzoriek : 7441
+2026-04-30 16:21:50,459 [INFO]   stress (1)   : 5083
+2026-04-30 16:21:50,459 [INFO]   no-stress (0): 2358
+2026-04-30 16:21:50,459 [INFO] Poèet hercov   : 91
+2026-04-30 16:21:50,460 [INFO] Rozloženie emócií:
+2026-04-30 16:21:50,461 [INFO]   ANG  label=1  count=1271
+2026-04-30 16:21:50,462 [INFO]   DIS  label=1  count=1271
+2026-04-30 16:21:50,462 [INFO]   FEA  label=1  count=1271
+2026-04-30 16:21:50,462 [INFO]   HAP  label=0  count=1271
+2026-04-30 16:21:50,462 [INFO]   SAD  label=1  count=1270
+2026-04-30 16:21:50,463 [INFO]   NEU  label=0  count=1087
+2026-04-30 16:21:50,463 [INFO] Rozloženie intenzít:
+2026-04-30 16:21:50,464 [INFO]   XX  count=6076
+2026-04-30 16:21:50,465 [INFO]   HI  count=455
+2026-04-30 16:21:50,465 [INFO]   LO  count=455
+2026-04-30 16:21:50,465 [INFO]   MD  count=455
+2026-04-30 16:21:50,468 [INFO] === HOTOVO ===  OK: 7441  FAIL: 0 ===
