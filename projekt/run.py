@@ -41,7 +41,7 @@ from src.config import (
     WS3D_FEATURE_DIM,
 )
 from src.data.tess_dataset import TessDataset
-from src.data.ws3d_dataset import Ws3dDataset   # <-- zmena
+from projekt.src.data.cremad_dataset import Ws3dDataset   # <-- zmena
 from src.data.transforms import get_train_transforms_mlp, get_train_transforms_cnn
 from src.models.mlp import MLP
 from src.models.cnn import CNN

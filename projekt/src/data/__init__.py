@@ -3,7 +3,7 @@ src/data package
 """
 
 from .tess_dataset import TessDataset
-from .ws3d_dataset import Ws3dDataset
+from .cremad_dataset import Ws3dDataset
 from .transforms import (
     GaussianNoise,
     SpecAugment,
