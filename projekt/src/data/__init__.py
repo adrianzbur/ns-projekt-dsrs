@@ -3,7 +3,7 @@ src/data package
 """
 
 from .tess_dataset import TessDataset
-from .cremad_dataset import Ws3dDataset
+from .cremad_dataset import CremadDataset
 from .transforms import (
     GaussianNoise,
     SpecAugment,
@@ -15,7 +15,7 @@ from .transforms import (
 
 __all__ = [
     "TessDataset",
-    "Ws3dDataset",
+    "CremadDataset",
     "GaussianNoise",
     "SpecAugment",
     "SpectrogramNoise",
