@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from pathlib import Path, PureWindowsPath
-
 import numpy as np
 import pandas as pd
 import torch
@@ -11,59 +9,16 @@ from torch.utils.data import Dataset
 from src.config import Config
 
 
-def _infer_label(filename: str) -> int:
+class CremadDataset(Dataset):
     """
-    Odvodí label z názvu súboru pomocou Config.WS3D_LABEL_MAPPING.
+    CREMA-D dataset loader kompatibilný s pipeline TESS + WS3D.
 
-    Príklady:
-        ses_a03.wav  → prefix "a"  → angry   → 1
-        ses_n04.wav  → prefix "n"  → neutral  → 0
-        ses_sa01.wav → prefix "sa" → sadness  → 1
-        ses38.m4a    → žiadny prefix → -1
-    """
-    stem = Path(filename).stem.lower()
+    Načíta metadata.csv vygenerovaný skriptom scripts/prepare_cremad.py.
 
-    if "_" not in stem:
-        return -1
+    mode='features'      -> MFCC tensor (120, T)   pre MLP
+    mode='spectrograms'  -> tensor (1, 128, T)     pre CNN
 
-    after_underscore = stem.split("_", 1)[1]  # "a03", "sa01", ...
-
-    emotion_prefix = ""
-    for ch in after_underscore:
-        if ch.isalpha():
-            emotion_prefix += ch
-        else:
-            break
-
-    if not emotion_prefix:
-        return -1
-
-    mapping = Config.WS3D_LABEL_MAPPING
-
-    if emotion_prefix in mapping:
-        return mapping[emotion_prefix]
-    if emotion_prefix[0] in mapping:
-        return mapping[emotion_prefix[0]]
-
-    return -1
-
-
-def _to_posix(path_str: str) -> str:
-    try:
-        return PureWindowsPath(path_str).as_posix()
-    except Exception:
-        return path_str
-
-
-class Ws3dDataset(Dataset):
-    """
-    WS3D dataset loader kompatibilný s existujúcim labels.csv.
-
-    Používa stratifikovaný split (rovnako ako TessDataset) pretože
-    dataset má príliš málo vzoriek (14) na speaker-independent split.
-
-    mode="features"     → tensor (120, T)   pre MLP
-    mode="spectrograms" → tensor (1, 128, T) pre CNN
+    Split: stratifikovaný podľa labelu (rovnaká logika ako TessDataset).
     """
 
     def __init__(
@@ -76,7 +31,7 @@ class Ws3dDataset(Dataset):
         seed: int | None = None,
     ):
         assert mode in ("features", "spectrograms"), f"Neznámy mode: {mode}"
-        assert split in ("train", "val", "test"), f"Neznámy split: {split}"
+        assert split in ("train", "val", "test"),    f"Neznámy split: {split}"
 
         self.mode      = mode
         self.split     = split
@@ -86,42 +41,28 @@ class Ws3dDataset(Dataset):
         _test_size = test_size if test_size is not None else Config.TEST_SIZE
         _seed      = seed      if seed      is not None else Config.RANDOM_SEED
 
-        # ── načítaj labels.csv ──────────────────────────────────────────────
-        labels_path = Config.WS3D_PROCESSED_PATH / "labels.csv"
-        if not labels_path.exists():
+        # ── načítaj metadata.csv ──────────────────────────────────────────
+        metadata_path = Config.CREMAD_PROCESSED_PATH / "metadata.csv"
+        if not metadata_path.exists():
             raise FileNotFoundError(
-                f"labels.csv nenájdený: {labels_path}\n"
-                "Spusti najprv: python scripts/prepare_ws3d.py"
+                f"metadata.csv nenájdený: {metadata_path}\n"
+                "Spusti najprv: python scripts/prepare_cremad.py"
             )
 
-        df = pd.read_csv(labels_path)
-        df.columns = [c.strip().lower() for c in df.columns]
-
-        # ── odvoď labely z názvu súboru ─────────────────────────────────────
-        df["label"] = df["filename"].apply(_infer_label)
-
-        # ── vyhoď riadky bez platného labelu (ses38.m4a a pod.) ─────────────
-        before = len(df)
+        df = pd.read_csv(metadata_path)
         df = df[df["label"].isin([0, 1])].reset_index(drop=True)
-        after = len(df)
 
-        if after == 0:
-            raise ValueError(
-                "Žiadne vzorky s platným labelom (0 alebo 1).\n"
-                "Skontroluj Config.WS3D_LABEL_MAPPING a názvy súborov v labels.csv."
-            )
+        if len(df) == 0:
+            raise ValueError("metadata.csv neobsahuje žiadne platné vzorky (label 0 alebo 1).")
 
-        print(f"[Ws3dDataset] Celkom: {before}  |  S labelom: {after}  |  "
-              f"Vyhodených: {before - after}  |  "
-              f"stress={(df['label'] == 1).sum()}  "
-              f"no-stress={(df['label'] == 0).sum()}")
+        print(
+            f"[CremadDataset] Celkom: {len(df)}  |  "
+            f"stress={(df['label'] == 1).sum()}  "
+            f"no-stress={(df['label'] == 0).sum()}  |  "
+            f"hercov={df['actor_id'].nunique()}"
+        )
 
-        # ── oprav Windows cesty na POSIX ────────────────────────────────────
-        for col in ("feat_path", "spec_path"):
-            df[col] = df[col].apply(_to_posix)
-
-        # ── stratifikovaný split podľa labelu ───────────────────────────────
-        # (rovnaká logika ako TessDataset — zaručí obe triedy v každom splite)
+        # ── stratifikovaný split podľa labelu ─────────────────────────────
         train_val_df, test_df = train_test_split(
             df,
             test_size=_test_size,
@@ -144,9 +85,11 @@ class Ws3dDataset(Dataset):
         else:
             self.metadata = test_df.reset_index(drop=True)
 
-        print(f"[Ws3dDataset] split='{split}'  vzorky={len(self.metadata)}  "
-              f"stress={(self.metadata['label'] == 1).sum()}  "
-              f"no-stress={(self.metadata['label'] == 0).sum()}")
+        print(
+            f"[CremadDataset] split='{split}'  vzorky={len(self.metadata)}  "
+            f"stress={(self.metadata['label'] == 1).sum()}  "
+            f"no-stress={(self.metadata['label'] == 0).sum()}"
+        )
 
         if len(self.metadata) == 0:
             raise ValueError(f"Split '{split}' je prázdny.")
@@ -160,7 +103,7 @@ class Ws3dDataset(Dataset):
 
         row = self.metadata.iloc[idx]
 
-        rel_path = row["feat_path"] if self.mode == "features" else row["spec_path"]
+        rel_path  = row["feat_path"] if self.mode == "features" else row["spec_path"]
         file_path = Config.ROOT_DIR / rel_path
 
         if not file_path.exists():
