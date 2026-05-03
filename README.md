@@ -4,11 +4,11 @@ Detekcia stresu z rečového signálu, Python – Neurónové siete
 Projekt porovnáva dva prístupy k detekcii stresu z reči:
 
 - **Nepriama detekcia:** TESS → stres aproximovaný z emócií (angry/fear/disgust/sad → stres)
-- **Priama detekcia:** WS3D → emócie zakódované v názve súboru (angry/sadness → stres)
+- **Priama detekcia:** CREMA-D → emócie zakódované v názve súboru (ANG/DIS/FEA/SAD → stres)
 
 Pre každý dataset trénujeme dva modely:
-- **MLP** – nad ručne extrahovanými príznakmi (MFCC + delta + delta2, shape 120×T)
-- **CNN** – nad log-Mel spektrogramom (shape 1×128×T)
+- **MLP** – nad ručne extrahovanými príznakmi (MFCC + delta + delta²), shape `(120, T)`
+- **CNN** – nad log-Mel spektrogramom, shape `(1, 128, T)`
 
 ---
 
@@ -19,20 +19,21 @@ ns-projekt-dsrs/
 │
 ├── data/
 │   ├── raw/
-│   │   ├── ws3d/                  ← AudioData/ (ses_a03.wav, ses_n04.wav, ...)
+│   │   ├── cremad/
+│   │   │   └── AudioWAV/          ← 1001_DFA_ANG_XX.wav, ...
 │   │   └── tess/                  ← OAF_angry/, YAF_neutral/, ...
 │   └── processed/
-│       ├── ws3d/
-│       │   ├── labels.csv         ← vygenerovaný prepare_ws3d.py
+│       ├── cremad/
+│       │   ├── metadata.csv       ← vygenerovaný prepare_cremad.py
 │       │   ├── features/          ← .npy shape (120, T)
 │       │   └── spectrograms/      ← .npy shape (128, T)
 │       └── tess/
 │           ├── metadata.csv       ← vygenerovaný prepare_tess.py
-│           ├── features/          ← .npy shape (13, T)
+│           ├── features/          ← .npy shape (120, T)
 │           └── spectrograms/      ← .npy shape (128, T)
 │
 ├── scripts/
-│   ├── prepare_ws3d.py            ← preprocessing WS3D datasetu
+│   ├── prepare_cremad.py          ← preprocessing CREMA-D datasetu
 │   └── prepare_tess.py            ← preprocessing TESS datasetu
 │
 ├── src/
@@ -40,8 +41,8 @@ ns-projekt-dsrs/
 │   │
 │   ├── data/
 │   │   ├── tess_dataset.py        ← TessDataset (stratified split)
-│   │   ├── ws3d_dataset.py        ← Ws3dDataset (speaker-independent split)
-│   │   └── transforms.py          ← GaussianNoise, SpecAugment, SpectrogramNoise
+│   │   ├── cremad_dataset.py      ← CremadDataset (stratified split)
+│   │   └── transforms.py         ← GaussianNoise, SpecAugment, SpectrogramNoise
 │   │
 │   ├── models/
 │   │   ├── mlp.py                 ← MLP: vstup (B, D) alebo (B, D, T) → logit (B,)
@@ -59,15 +60,15 @@ ns-projekt-dsrs/
 │   ├── models/                    ← najlepšie checkpointy (.pt)
 │   │   ├── tess_mlp_best.pt
 │   │   ├── tess_cnn_best.pt
-│   │   ├── ws3d_mlp_best.pt
-│   │   └── ws3d_cnn_best.pt
+│   │   ├── cremad_mlp_best.pt
+│   │   └── cremad_cnn_best.pt
 │   ├── plots/                     ← všetky grafy
 │   ├── logs/                      ← logy z preprocessingu
 │   └── summary_metrics.json       ← metriky všetkých experimentov
 │
 ├── notebooks/
 │   ├── 01_eda_tess.ipynb
-│   ├── 02_eda_ws3d.ipynb
+│   ├── 02_eda_cremad.ipynb
 │   └── 03_results_comparison.ipynb
 │
 ├── requirements.txt
@@ -96,13 +97,13 @@ pip install -r requirements.txt
 python scripts/prepare_tess.py
 ```
 
-**WS3D** – nahrajte audio súbory do `data/raw/ws3d/AudioData/`, potom:
+**CREMA-D** – nahrajte audio súbory do `data/raw/cremad/AudioWAV/`, potom:
 ```bash
-python scripts/prepare_ws3d.py
+python scripts/prepare_cremad.py
 ```
 
 > Po preprocessingu vzniknú súbory `data/processed/tess/metadata.csv`
-> a `data/processed/ws3d/labels.csv` ktoré používajú Dataset triedy.
+> a `data/processed/cremad/metadata.csv` ktoré používajú Dataset triedy.
 
 ---
 
@@ -112,8 +113,8 @@ python scripts/prepare_ws3d.py
 # Jednotlivé kombinácie
 python run.py --dataset tess --model mlp
 python run.py --dataset tess --model cnn
-python run.py --dataset ws3d --model mlp
-python run.py --dataset ws3d --model cnn
+python run.py --dataset cremad --model mlp
+python run.py --dataset cremad --model cnn
 
 # Všetky 4 kombinácie naraz
 python run.py --dataset all --model all
@@ -135,7 +136,7 @@ Grafy sa automaticky ukladajú do `outputs/plots/`:
 |---|---|
 | `tess_mlp_training_curves.png` | Loss a accuracy krivky |
 | `tess_mlp_confusion_matrix.png` | Confusion matrix s ACC a AUC |
-| `ws3d_cnn_training_curves.png` | ... (analogicky pre každú kombináciu) |
+| `cremad_cnn_training_curves.png` | ... (analogicky pre každú kombináciu) |
 | `roc_curves.png` | ROC krivky všetkých modelov |
 | `comparison_bar.png` | Porovnanie ACC/F1/Precision/Recall |
 
@@ -156,29 +157,29 @@ Súhrnné metriky všetkých experimentov: `outputs/summary_metrics.json`
 | neutral, calm, ps | 0 (bez stresu) |
 | angry, fear, disgust, sad | 1 (stres) |
 
-### WS3D (WorkStress3D)
-- Audio nahrávky s emóciami zakódovanými v názve súboru
+### CREMA-D (Crowd-sourced Emotional Multimodal Actors Dataset)
+- 7 442 nahrávok, 91 hercov, 6 emócií, 4 úrovne intenzity
 - Sample rate: 16 000 Hz
-- Split: speaker-independent (train / val / test podľa subjektu)
-- Mapovanie emócií z názvu súboru (`ses_a03.wav` → prefix `a` → angry → 1):
+- Split: stratifikovaný náhodný (train 60% / val 20% / test 20%)
+- Formát názvu súboru: `{ActorID}_{Sentence}_{Emotion}_{Intensity}.wav`
+  - napr. `1001_DFA_ANG_XX.wav`
+- Mapovanie emócií z názvu súboru na label:
 
-| Prefix | Emócia | Label |
-|--------|--------|-------|
-|   n    | neutral|  0    |
-|   h    |  happy |  0    |
-|   c    | calm,  |       |
-|   ps   |pleasant|  0    |
-|        |surprise|       |
-|   a    | angry  |  1    |
-|   sa   | sadness|  1    |
-|   d,f  | disgust, fear | 1 |
+| Kód | Emócia | Intenzita | Label |
+|-----|--------|-----------|-------|
+| ANG | Anger | LO / MD / HI / XX | 1 (stres) |
+| DIS | Disgust | LO / MD / HI / XX | 1 (stres) |
+| FEA | Fear | LO / MD / HI / XX | 1 (stres) |
+| SAD | Sad | LO / MD / HI / XX | 1 (stres) |
+| HAP | Happy | LO / MD / HI / XX | 0 (bez stresu) |
+| NEU | Neutral | LO / MD / HI / XX | 0 (bez stresu) |
 
 ---
 
 ## Modely
 
 ### MLP
-- **Vstup:** MFCC + delta + delta2, shape `(120, T)` → priemeruje cez časovú os → `(B, 120)`
+- **Vstup:** MFCC + delta + delta², shape `(120, T)` → priemeruje cez časovú os → `(B, 120)`
 - **Architektúra:** BN → [Linear → BN → ReLU → Dropout] × 3 → Linear
 - **Skryté vrstvy:** 256 → 128 → 64
 - **Výstup:** logit `(B,)` → BCEWithLogitsLoss
@@ -188,3 +189,16 @@ Súhrnné metriky všetkých experimentov: `outputs/summary_metrics.json`
 - **Architektúra:** [Conv2d → BN → ReLU → SEBlock → MaxPool] × 3 → GAP → Dropout → Linear
 - **Kanály:** 32 → 64 → 128
 - **Výstup:** logit `(B,)` → BCEWithLogitsLoss
+
+---
+
+## Audio parametre
+
+| Parameter | Hodnota |
+|---|---|
+| Sample rate | 16 000 Hz |
+| Dĺžka nahrávky | 3.0 s |
+| N_MFCC | 40 (+ delta + delta² = 120) |
+| N_MELS | 128 |
+| HOP_LENGTH | 512 |
+| N_FFT | 2048 |

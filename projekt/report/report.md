@@ -1,204 +1,201 @@
-# ns-projekt-dsrs
-Detekcia stresu z rečového signálu, Python – Neurónové siete
+# Report – Detekcia stresu z rečového signálu (TESS + WS3D)
 
-Projekt porovnáva dva prístupy k detekcii stresu z reči:
+## 1. Formulácia problému
+Cieľom projektu je navrhnúť a implementovať systém na **detekciu stresu z rečového signálu** pomocou neurónových sietí. Stres je klasifikovaný binárne ako:
+- **0 – no-stress**
+- **1 – stress**
 
-- **Nepriama detekcia:** TESS → stres aproximovaný z emócií (angry/fear/disgust/sad → stres)
-- **Priama detekcia:** CREMA-D → emócie zakódované v názve súboru (ANG/DIS/FEA/SAD → stres)
+Projekt porovnáva dva scenáre:
+1. **Nepriama detekcia stresu (TESS)** – stres je aproximovaný z emočného prejavu v reči (určité emócie mapované na „stress“).
+2. **Priama detekcia stresu (WS3D / WorkStress3D)** – stres/no-stress je odvodený z označenia/prefixu v názve nahrávky (mapovanie definované v konfigurácii projektu).
 
-Pre každý dataset trénujeme dva modely:
-- **MLP** – nad ručne extrahovanými príznakmi (MFCC + delta + delta²), shape `(120, T)`
-- **CNN** – nad log-Mel spektrogramom, shape `(1, 128, T)`
-
----
-
-## Štruktúra projektu
-
-```
-ns-projekt-dsrs/
-│
-├── data/
-│   ├── raw/
-│   │   ├── cremad/
-│   │   │   └── AudioWAV/          ← 1001_DFA_ANG_XX.wav, ...
-│   │   └── tess/                  ← OAF_angry/, YAF_neutral/, ...
-│   └── processed/
-│       ├── cremad/
-│       │   ├── metadata.csv       ← vygenerovaný prepare_cremad.py
-│       │   ├── features/          ← .npy shape (120, T)
-│       │   └── spectrograms/      ← .npy shape (128, T)
-│       └── tess/
-│           ├── metadata.csv       ← vygenerovaný prepare_tess.py
-│           ├── features/          ← .npy shape (120, T)
-│           └── spectrograms/      ← .npy shape (128, T)
-│
-├── scripts/
-│   ├── prepare_cremad.py          ← preprocessing CREMA-D datasetu
-│   └── prepare_tess.py            ← preprocessing TESS datasetu
-│
-├── src/
-│   ├── config.py                  ← jeden zdroj pravdy pre všetky parametre
-│   │
-│   ├── data/
-│   │   ├── tess_dataset.py        ← TessDataset (stratified split)
-│   │   ├── cremad_dataset.py      ← CremadDataset (stratified split)
-│   │   └── transforms.py         ← GaussianNoise, SpecAugment, SpectrogramNoise
-│   │
-│   ├── models/
-│   │   ├── mlp.py                 ← MLP: vstup (B, D) alebo (B, D, T) → logit (B,)
-│   │   └── cnn.py                 ← CNN so SE blokmi: vstup (B, 1, 128, T) → logit (B,)
-│   │
-│   ├── training/
-│   │   ├── trainer.py             ← Trainer trieda (fit + evaluate)
-│   │   └── metrics.py             ← compute_metrics, print_metrics, compare_metrics
-│   │
-│   └── evaluation/
-│       └── evaluate.py            ← plot_training_curves, plot_confusion_matrix,
-│                                     plot_roc_curves, plot_comparison_bar
-│
-├── outputs/
-│   ├── models/                    ← najlepšie checkpointy (.pt)
-│   │   ├── tess_mlp_best.pt
-│   │   ├── tess_cnn_best.pt
-│   │   ├── cremad_mlp_best.pt
-│   │   └── cremad_cnn_best.pt
-│   ├── plots/                     ← všetky grafy
-│   ├── logs/                      ← logy z preprocessingu
-│   └── summary_metrics.json       ← metriky všetkých experimentov
-│
-├── notebooks/
-│   ├── 01_eda_tess.ipynb
-│   ├── 02_eda_cremad.ipynb
-│   └── 03_results_comparison.ipynb
-│
-├── requirements.txt
-├── README.md
-└── run.py                         ← hlavný vstupný bod
-```
+Pre oba datasety porovnávame dve architektúry:
+- **MLP** (Multi-Layer Perceptron) nad vektorom príznakov (features),
+- **CNN** (Convolutional Neural Network) nad log-Mel spektrogramami.
 
 ---
 
-## Inštalácia
+## 2. Teoretický background
+### 2.1 Stres v reči a reprezentácia signálu
+Stres sa v reči prejavuje napr. zmenami v:
+- prosódii (tempo, intonácia),
+- energii a hlasitosti,
+- spektrálnych vlastnostiach (zmena distribúcie energie vo frekvenciách).
 
-```bash
-git clone <repo-url>
-cd ns-projekt-dsrs
-pip install -r requirements.txt
-```
+Na spracovanie reči sa často používajú:
+- **MFCC** (Mel-Frequency Cepstral Coefficients) – kompaktná reprezentácia spektra relevantná pre percepciu,
+- **log-Mel spektrogram** – časovo-frekvenčná reprezentácia vhodná pre CNN.
 
----
+### 2.2 MLP nad príznakmi
+MLP je vhodné, keď máme už extrahované príznaky (features). Výhodou je jednoduchosť a nízke výpočtové nároky, nevýhodou citlivosť na kvalitu features a stratu informácie, ak príliš agregujeme čas.
 
-## Použitie
+### 2.3 CNN nad spektrogramom
+CNN vie učiť lokálne vzory v časovo-frekvenčnom obraze (spektrálne formanty, zmeny energie). Výhodou je schopnosť učiť sa robustné reprezentácie priamo z „obrazu“ spektrogramu.
 
-### 1. Príprava dát
-
-**TESS** – nahrajte `.wav` súbory do `data/raw/tess/`, potom:
-```bash
-python scripts/prepare_tess.py
-```
-
-**CREMA-D** – nahrajte audio súbory do `data/raw/cremad/AudioWAV/`, potom:
-```bash
-python scripts/prepare_cremad.py
-```
-
-> Po preprocessingu vzniknú súbory `data/processed/tess/metadata.csv`
-> a `data/processed/cremad/metadata.csv` ktoré používajú Dataset triedy.
+### 2.4 Klasifikačné metriky
+Pre binárnu klasifikáciu používame:
+- **Accuracy (ACC)** – podiel správnych klasifikácií,
+- **Precision, Recall, F1-score** – vhodné pri nevyvážených triedach,
+- **ROC-AUC** – robustná metrika pri prahovaní pravdepodobností,
+- **Confusion matrix** – pre analýzu typov chýb.
 
 ---
 
-### 2. Tréning
+## 3. Popis datasetu a predspracovanie dát
+### 3.1 TESS
+TESS (Toronto Emotional Speech Set) obsahuje nahrávky hovoreného slova s rôznymi emóciami. Pre účely projektu sa emócie mapujú na binárny stres:
+- `neutral`, `calm`, `ps` → **0 (no-stress)**
+- `angry`, `fear`, `disgust`, `sad` → **1 (stress)**
 
-```bash
-# Jednotlivé kombinácie
-python run.py --dataset tess --model mlp
-python run.py --dataset tess --model cnn
-python run.py --dataset cremad --model mlp
-python run.py --dataset cremad --model cnn
+**Split:** v implementácii sa používa stratifikovaný split na train/val/test (pomery podľa konfigurácie).
 
-# Všetky 4 kombinácie naraz
-python run.py --dataset all --model all
+### 3.2 WS3D (WorkStress3D)
+WS3D obsahuje reálne nahrávky, kde sa labely odvodzujú z prefixu v názve nahrávky podľa mapovania definovaného v `Config.WS3D_LABEL_MAPPING`:
+- `a` (angry) → 1
+- `n` (neutral) → 0
+- `h` (happy) → 0
+- `sa` (sadness) → 1
+- `d` (disgust) → 1
+- `f` (fear) → 1
+- `ps` (pleasant surprise) → 0
+- `c` (calm) → 0
 
-# S vlastnými parametrami
-python run.py --dataset tess --model mlp --epochs 100 --device cuda
+**Split:** speaker-independent (subjekty sa medzi train/val/test nemiešajú), aby sa predišlo úniku informácie.
 
-# Deterministický režim (reprodukovateľnosť)
-python run.py --dataset all --model all --deterministic
-```
+### 3.3 Predspracovanie
+Predspracovanie zahŕňa:
+- resampling na **16 kHz**,
+- zarovnanie/orez/padding na fixnú dĺžku (napr. 3 s),
+- extrakciu features:
+  - pre MLP: MFCC (+ prípadne delta/delta2 podľa vášho spracovania),
+  - pre CNN: log-Mel spektrogram.
 
----
-
-### 3. Výsledky
-
-Grafy sa automaticky ukladajú do `outputs/plots/`:
-
-| Súbor | Obsah |
-|---|---|
-| `tess_mlp_training_curves.png` | Loss a accuracy krivky |
-| `tess_mlp_confusion_matrix.png` | Confusion matrix s ACC a AUC |
-| `cremad_cnn_training_curves.png` | ... (analogicky pre každú kombináciu) |
-| `roc_curves.png` | ROC krivky všetkých modelov |
-| `comparison_bar.png` | Porovnanie ACC/F1/Precision/Recall |
-
-Súhrnné metriky všetkých experimentov: `outputs/summary_metrics.json`
+Výstupy sa ukladajú do:
+- `data/processed/<dataset>/features/*.npy`
+- `data/processed/<dataset>/spectrograms/*.npy`
 
 ---
 
-## Datasety
+## 4. Metodológia
+### 4.1 Vstupy modelov
+- **MLP**: vstup je vektor príznakov `x ∈ R^D` (D závisí od datasetu/feature pipeline).
+- **CNN**: vstup je log-Mel spektrogram `x ∈ R^{1×N_MELS×T}`.
 
-### TESS (Toronto Emotional Speech Set)
-- 2 800 nahrávok, 2 herečky, 7 emócií
-- Sample rate: 24 414 Hz → resampleujeme na 16 000 Hz
-- Split: stratifikovaný náhodný (train 60% / val 20% / test 20%)
-- Mapovanie emócií na label:
+### 4.2 Tréning
+Použité prvky tréningu:
+- loss: **BCEWithLogitsLoss** (binárna klasifikácia),
+- optimizer: napr. Adam,
+- regularizácia: weight decay, dropout,
+- early stopping / výber best checkpointu podľa validačnej metriky (ak implementované v Trainer-i).
 
-| Emócia | Label |
-|---|---|
-| neutral, calm, ps | 0 (bez stresu) |
-| angry, fear, disgust, sad | 1 (stres) |
-
-### CREMA-D (Crowd-sourced Emotional Multimodal Actors Dataset)
-- 7 442 nahrávok, 91 hercov, 6 emócií, 4 úrovne intenzity
-- Sample rate: 16 000 Hz
-- Split: stratifikovaný náhodný (train 60% / val 20% / test 20%)
-- Formát názvu súboru: `{ActorID}_{Sentence}_{Emotion}_{Intensity}.wav`
-  - napr. `1001_DFA_ANG_XX.wav`
-- Mapovanie emócií z názvu súboru na label:
-
-| Kód | Emócia | Intenzita | Label |
-|-----|--------|-----------|-------|
-| ANG | Anger | LO / MD / HI / XX | 1 (stres) |
-| DIS | Disgust | LO / MD / HI / XX | 1 (stres) |
-| FEA | Fear | LO / MD / HI / XX | 1 (stres) |
-| SAD | Sad | LO / MD / HI / XX | 1 (stres) |
-| HAP | Happy | LO / MD / HI / XX | 0 (bez stresu) |
-| NEU | Neutral | LO / MD / HI / XX | 0 (bez stresu) |
+### 4.3 Augmentácie
+Augmentácie sa používajú len pre train:
+- pre MLP: **GaussianNoise**,
+- pre CNN: **SpectrogramNoise** a **SpecAugment** (časové a frekvenčné maskovanie).
 
 ---
 
-## Modely
+## 5. Návrh experimentov
+Navrhli sme experimenty tak, aby porovnávali:
+1. Datasetový efekt: TESS vs WS3D
+2. Modelový efekt: MLP vs CNN
+3. Dopad augmentácií (ablation study – kontrolovaný experiment)
 
-### MLP
-- **Vstup:** MFCC + delta + delta², shape `(120, T)` → priemeruje cez časovú os → `(B, 120)`
-- **Architektúra:** BN → [Linear → BN → ReLU → Dropout] × 3 → Linear
-- **Skryté vrstvy:** 256 → 128 → 64
-- **Výstup:** logit `(B,)` → BCEWithLogitsLoss
+### 5.1 Základné experimenty
+- TESS + MLP
+- TESS + CNN
+- WS3D + MLP
+- WS3D + CNN
 
-### CNN
-- **Vstup:** log-Mel spektrogram, shape `(B, 1, 128, T)`
-- **Architektúra:** [Conv2d → BN → ReLU → SEBlock → MaxPool] × 3 → GAP → Dropout → Linear
-- **Kanály:** 32 → 64 → 128
-- **Výstup:** logit `(B,)` → BCEWithLogitsLoss
+### 5.2 Ablation study (kontrolovaný experiment)
+Minimálne jeden kontrolovaný experiment:
+- **CNN na WS3D s augmentáciami vs bez augmentácií**
+  - (A) WS3D+CNN s `SpecAugment` + `SpectrogramNoise`
+  - (B) WS3D+CNN bez augmentácií (transform=None)
+
+Kontrolované je všetko okrem augmentácií (rovnaké epochy, batch size, optimizer, split, seed).
 
 ---
 
-## Audio parametre
+## 6. Výsledky
+### 6.1 Tabuľka výsledkov (test set)
+Doplňte hodnoty z `outputs/summary_metrics.json` a z test evaluácie.
 
-| Parameter | Hodnota |
-|---|---|
-| Sample rate | 16 000 Hz |
-| Dĺžka nahrávky | 3.0 s |
-| N_MFCC | 40 (+ delta + delta² = 120) |
-| N_MELS | 128 |
-| HOP_LENGTH | 512 |
-| N_FFT | 2048 |
+| Dataset | Model | ACC | F1 | Precision | Recall | ROC-AUC |
+|---|---|---:|---:|---:|---:|---:|
+| TESS | MLP | [DOPLŇ] | [DOPLŇ] | [DOPLŇ] | [DOPLŇ] | [DOPLŇ] |
+| TESS | CNN | [DOPLŇ] | [DOPLŇ] | [DOPLŇ] | [DOPLŇ] | [DOPLŇ] |
+| WS3D | MLP | [DOPLŇ] | [DOPLŇ] | [DOPLŇ] | [DOPLŇ] | [DOPLŇ] |
+| WS3D | CNN | [DOPLŇ] | [DOPLŇ] | [DOPLŇ] | [DOPLŇ] | [DOPLŇ] |
+
+### 6.2 Priebeh tréningovej a validačnej chyby
+Do reportu vložte grafy generované skriptom (napr. `*_training_curves.png`):
+- train loss vs val loss,
+- train accuracy vs val accuracy.
+
+Komentár (čo sledovať):
+- či val loss klesá podobne ako train loss (generalizácia),
+- či sa objavuje overfitting (train sa zlepšuje, val sa zhoršuje),
+- stabilita tréningu (oscilácie).
+
+### 6.3 Ablation study – výsledky
+| Experiment | ACC | F1 | ROC-AUC | Poznámka |
+|---|---:|---:|---:|---|
+| WS3D + CNN (augmentácie ON) | [DOPLŇ] | [DOPLŇ] | [DOPLŇ] | SpecAugment + noise |
+| WS3D + CNN (augmentácie OFF) | [DOPLŇ] | [DOPLŇ] | [DOPLŇ] | transform=None |
+
+---
+
+## 7. Kritická analýza a diskusia
+### 7.1 Porovnanie MLP vs CNN
+Očakávania:
+- CNN môže lepšie zachytiť časovo-frekvenčné vzory súvisiace so stresom (ak je dosť dát),
+- MLP môže byť stabilnejšie pri menšom datasete alebo pri kvalitných features.
+
+Diskusia (doplňte podľa výsledkov):
+- Na ktorom datasete vyhralo CNN a prečo?
+- Kde zlyhalo (overfitting, málo dát, šum, nekonzistentné labely)?
+
+### 7.2 Rozdiel medzi TESS a WS3D
+TESS je emočný dataset a stres je len aproximácia – model sa učí skôr „emočný stres“ než fyziologický/psychologický stres.
+WS3D je realistickejší, no môže mať:
+- väčšiu variabilitu nahrávok,
+- šum, rôzne zariadenia,
+- nevyvážené triedy,
+- riziko „slabého“ labelovania, ak je label odvodený z názvu a nie z priamo anotovaného stresu.
+
+### 7.3 Analýza chýb (confusion matrix)
+Do reportu vložte confusion matrix pre každú kombináciu.
+Odporúčaná analýza:
+- či model viac robí FP (no-stress → stress) alebo FN (stress → no-stress),
+- čo je horšie z pohľadu aplikácie (typicky FN je rizikovejší).
+
+---
+
+## 8. Obmedzenia a možnosti ďalšej práce
+### Obmedzenia
+- WS3D labelovanie z prefixu nemusí priamo zodpovedať „stresu“ v reálnej situácii (môže ísť o emócie).
+- Obmedzený počet subjektov → zložitejšia generalizácia v speaker-independent splite.
+- Fixná dĺžka segmentu (napr. 3 s) môže zahodiť kontext.
+
+### Ďalšia práca
+- Zaviesť robustnejší preprocessing (VAD – voice activity detection).
+- Skúsiť architektúry pre audio: CRNN, wav2vec2 embeddings + klasifikátor.
+- Lepšie vyváženie tried (weighted loss, focal loss).
+- Viac ablation experimentov: bez noise, bez SpecAugment, rôzne N_MELS/N_MFCC.
+
+---
+
+## 9. Prínos jednotlivých členov tímu
+(Doplňte mená a konkrétne úlohy.)
+
+- Člen A: preprocessing WS3D, konverzia formátov, príprava features/spektrogramov
+- Člen B: implementácia modelov (MLP, CNN), tréningový pipeline
+- Člen C: experimenty, vyhodnotenie, grafy, report
+
+---
+
+## 10. Zoznam použitej literatúry
+- Park, D. S., Chan, W., Zhang, Y., Chiu, C.-C., Zoph, B., Cubuk, E. D., & Le, Q. V. (2019). *SpecAugment: A Simple Data Augmentation Method for Automatic Speech Recognition*. arXiv:1904.08779.
+- Základná literatúra ku MFCC a log-Mel reprezentáciám (učebnicové zdroje / dokumentácia knižníc, ktoré používate).
+- Dokumentácia PyTorch (Dataset, DataLoader, optimizéry).
